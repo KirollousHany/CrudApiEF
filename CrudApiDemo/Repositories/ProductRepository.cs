@@ -1,6 +1,7 @@
 ﻿using CrudApiDemo.Data;
 using CrudApiDemo.Interfaces.IRepository;
 using CrudApiDemo.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrudApiDemo.Repositories
 {
@@ -13,22 +14,21 @@ namespace CrudApiDemo.Repositories
             context = _context;
         }
 
-        public List<Product> GetAll()
+        public async Task<List<Product>> GetAll()
         {
-            return context.Products.ToList();
+            return await context.Products.ToListAsync();
         }
 
-        public Product? GetById(int id)
+        public async Task<Product?> GetById(int id)
         {
-            return context.Products.FirstOrDefault(p => p.Id == id);
+            return await context.Products.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public bool Add(Product item)
+        public async Task<bool> Add(Product item)
         {
             try
             {
                 context.Products.Add(item);
-                context.SaveChanges();
                 return true;
             }
             catch (Exception)
@@ -37,12 +37,11 @@ namespace CrudApiDemo.Repositories
             }
         }
 
-        public bool Delete(Product item)
+        public async Task<bool> Delete(Product item)
         {
             try
             {
                 context.Products.Remove(item);
-                context.SaveChanges();
                 return true;
             }
             catch (Exception)
@@ -51,32 +50,22 @@ namespace CrudApiDemo.Repositories
             }
         }
 
-        public bool UpdateName(Product product, string newName)
+        public async Task<bool> UpdateName(Product product, string newName)
         {
-            try
-            {
-                product.Name = newName;
-                context.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            product.Name = newName;
+            return true;
         }
 
-        public bool UpdatePrice(Product product, decimal newPrice)
+        public async Task<bool> UpdatePrice(Product product, decimal newPrice)
         {
-            try
-            {
-                product.Price = newPrice;
-                context.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            product.Price = newPrice;
+            return true;
+        }
+
+        public async Task<bool> ProductExists(int productId)
+        {
+            return await context.Products.AnyAsync(p => p.Id == productId);
+
         }
     }
 }

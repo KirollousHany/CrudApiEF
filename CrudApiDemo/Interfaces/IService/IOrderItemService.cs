@@ -4,14 +4,12 @@ namespace CrudApiDemo.Interfaces.IService
 {
     public interface IOrderItemService
     {
-        List<OrderItem> GetAll();
-        OrderItem? GetByCompositeKey(int orderId, int productId);
-        bool Add(OrderItem item);
-        bool Delete(int orderId, int productId);
-        bool UpdateQuantity(int orderId, int productId, int newQuantity);
-        public bool OrderExists(int orderId);
-        public bool ProductExists(int productId);
-        List<OrderItem> GetByOrderId(int orderId);
+        Task<List<OrderItem>> GetAll();
+        Task<OrderItem?> GetByCompositeKey(int orderId, int productId);
+        Task<bool> Add(OrderItem item);
+        Task<bool> Delete(int orderId, int productId);
+        Task<bool> UpdateQuantity(int orderId, int productId, int newQuantity);
+        Task<List<OrderItem>> GetByOrderId(int orderId);
 
     }
 }

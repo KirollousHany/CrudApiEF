@@ -2,9 +2,9 @@
 {
     public interface ICrudRepository<T>
     {
-        List<T> GetAll();
-        T? GetById(int id);
-        bool Add(T item);
-        bool Delete(T item);
+        Task<List<T>> GetAll();
+        Task<T?> GetById(int id);
+        Task<bool> Add(T item);
+        Task<bool> Delete(T item);
     }
 }

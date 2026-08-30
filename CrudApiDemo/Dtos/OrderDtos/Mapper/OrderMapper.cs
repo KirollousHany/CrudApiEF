@@ -6,15 +6,11 @@ namespace CrudApiDemo.Dtos.OrderDtos.Mapper
     {
         public static OrderDto ToOrderDto(this Order order)
         {
-            var total = order.OrderItems?.Sum(oi => oi.Quantity * (oi.Product != null ? oi.Product.Price : 0)) ?? 0;
-
             return new OrderDto
             {
                 Id = order.Id,
                 ClientId = order.ClientId,
-                ClientName = order.Client != null ? order.Client.Name : "",
                 Date = order.Date,
-                TotalAmount = total
             };
         }
 

@@ -10,10 +10,7 @@ namespace CrudApiDemo.Dtos.OrderItemDto.Mapper
             {
                 OrderId = item.OrderId,
                 ProductId = item.ProductId,
-                ProductName = item.Product != null ? item.Product.Name : "",
-                ProductPrice = item.Product != null ? item.Product.Price : 0,
                 Quantity = item.Quantity,
-                Total = item.Product != null ? item.Product.Price * item.Quantity : 0
             };
         }
 
@@ -22,7 +19,7 @@ namespace CrudApiDemo.Dtos.OrderItemDto.Mapper
             return items.Select(i => i.ToOrderItemDto()).ToList();
         }
 
-        public static OrderItem ToOrderItemEntity(this CreateOrderItemDto dto)
+        public static OrderItem ToOrderItemEntity(this OrderItemDto dto)
         {
             return new OrderItem
             {

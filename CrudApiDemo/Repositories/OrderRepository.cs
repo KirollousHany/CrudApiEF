@@ -9,39 +9,36 @@ namespace CrudApiDemo.Repositories
     {
         private readonly AppDbContext context;
 
-
         public OrderRepository(AppDbContext _context)
         {
             context = _context;
-
         }
 
-        public List<Order> GetAll()
+        public async Task<List<Order>> GetAll()
         {
-            return context.Orders.Include(o => o.Client).Include(o => o.OrderItems).ThenInclude(oi => oi.Product).ToList();
+            return await context.Orders.Include(o => o.Client).Include(o => o.OrderItems).ThenInclude(oi => oi.Product).ToListAsync();
         }
 
-        public Order? GetById(int id)
+        public async Task<Order?> GetById(int id)
         {
-            return context.Orders.Include(o => o.Client).Include(o => o.OrderItems).ThenInclude(oi => oi.Product).FirstOrDefault(o => o.Id == id);
+            return await context.Orders.Include(o => o.Client).Include(o => o.OrderItems).ThenInclude(oi => oi.Product).FirstOrDefaultAsync(o => o.Id == id);
         }
 
-        public List<Order> GetOrdersByClientId(int clientId)
+        public async Task<List<Order>> GetOrdersByClientId(int clientId)
         {
-            return context.Orders
+            return await context.Orders
                 .Where(o => o.ClientId == clientId)
                 .Include(o => o.Client)
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.Product)
-                .ToList();
+                .ToListAsync();
         }
 
-        public bool Add(Order item)
+        public async Task<bool> Add(Order item)
         {
             try
             {
                 context.Orders.Add(item);
-                context.SaveChanges();
                 return true;
             }
             catch (Exception)
@@ -50,12 +47,11 @@ namespace CrudApiDemo.Repositories
             }
         }
 
-        public bool Delete(Order item)
+        public async Task<bool> Delete(Order item)
         {
             try
             {
                 context.Orders.Remove(item);
-                context.SaveChanges();
                 return true;
             }
             catch (Exception)
@@ -64,18 +60,16 @@ namespace CrudApiDemo.Repositories
             }
         }
 
-        public bool UpdateDate(Order order, DateTime newDate)
+        public async Task<bool> UpdateDate(Order order, DateTime newDate)
         {
-            try
-            {
-                order.Date = newDate;
-                context.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            order.Date = newDate;
+            return true;
         }
+
+        public async Task<bool> OrderExists(int orderId)
+        {
+            return await context.Orders.AnyAsync(o => o.Id == orderId);
+        }
+
     }
 }

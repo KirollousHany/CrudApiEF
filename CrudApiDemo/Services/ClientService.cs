@@ -1,57 +1,140 @@
 ﻿using CrudApiDemo.Interfaces.IRepository;
 using CrudApiDemo.Interfaces.IService;
 using CrudApiDemo.Models;
+using CrudApiDemo.ViewModels;
 
 namespace CrudApiDemo.Services
 {
     public class ClientService : ICrudService<Client>, IClientService
     {
-        private readonly ICrudRepository<Client> crudRepo;
-        private readonly IClientRepository clientRepo;
+        private readonly IUnitOfWork _uow;
 
-        public ClientService(ICrudRepository<Client> _crudRepo, IClientRepository _clientRepo)
+        public ClientService(IUnitOfWork uow)
         {
-            crudRepo = _crudRepo;
-            clientRepo = _clientRepo;
+            _uow = uow;
         }
 
-        public bool Add(Client item)
+        public async Task<List<Client>> GetAll()
         {
-            return clientRepo.EmailExists(item.Email) ? false : crudRepo.Add(item);
+            return await _uow.ClientCrudRepo.GetAll();
         }
 
-        public bool Delete(int id)
+        public async Task<Client?> GetById(int id)
         {
-            var client = crudRepo.GetById(id);
-            return client != null ? crudRepo.Delete(client) : false;
+            return await _uow.ClientCrudRepo.GetById(id);
         }
 
-        public List<Client> GetAll()
+        public async Task<bool> Add(Client item)
         {
-            return crudRepo.GetAll();
+            if (await _uow.ClientRepo.EmailExists(item.Email)) return false;
+
+            if (!await _uow.ClientCrudRepo.Add(item)) return false;
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-        public Client? GetById(int id)
+        public async Task<bool> Delete(int id)
         {
-            return crudRepo.GetById(id);
+            var existing = await _uow.ClientCrudRepo.GetById(id);
+            if (existing == null) return false;
+
+            if (!await _uow.ClientCrudRepo.Delete(existing)) return false;
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-        public bool UpdateEmail(int id, string newEmail)
+        public async Task<bool> UpdateName(int id, string newName)
         {
-            var client = crudRepo.GetById(id);
-            return client != null ? clientRepo.UpdateEmail(client, newEmail) : false;
+            var existing = await _uow.ClientCrudRepo.GetById(id);
+            if (existing == null) return false;
+
+            await _uow.ClientRepo.UpdateName(existing, newName);
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-        public bool UpdateName(int id, string newName)
+        public async Task<bool> UpdateEmail(int id, string newEmail)
         {
-            var client = crudRepo.GetById(id);
-            return client != null ? clientRepo.UpdateName(client, newName) : false;
+            var existing = await _uow.ClientCrudRepo.GetById(id);
+            if (existing == null) return false;
+
+            await _uow.ClientRepo.UpdateEmail(existing, newEmail);
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-        public bool UpdatePassword(int id, string newPassword)
+        public async Task<bool> UpdatePassword(int id, string newPassword)
         {
-            var client = crudRepo.GetById(id);
-            return client != null ? clientRepo.UpdatePassword(client, newPassword) : false;
+            var existing = await _uow.ClientCrudRepo.GetById(id);
+            if (existing == null) return false;
+
+            await _uow.ClientRepo.UpdatePassword(existing, newPassword);
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<ClientDetailsViewModel?> GetClientDetails(int id)
+        {
+            var client = await _uow.ClientCrudRepo.GetById(id);
+            if (client == null) return null;
+
+            var orders = await _uow.OrderRepo.GetOrdersByClientId(id);
+            var orderSummaries = orders.Select(o => new ClientOrderSummary
+            {
+                OrderId = o.Id,
+                Date = o.Date,
+                ItemCount = o.OrderItems.Count,
+                OrderTotal = o.OrderItems.Sum(oi => oi.Quantity * (oi.Product != null ? oi.Product.Price : 0))
+            }).ToList();
+            return new ClientDetailsViewModel
+            {
+                Id = client.Id,
+                Name = client.Name,
+                Email = client.Email,
+                TotalOrders = orderSummaries.Count,
+                TotalSpent = orderSummaries.Sum(o => o.OrderTotal),
+                Orders = orderSummaries
+            };
         }
     }
 }

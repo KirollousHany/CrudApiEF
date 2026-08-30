@@ -14,26 +14,31 @@ namespace CrudApiDemo.Repositories
             context = _context;
         }
 
-        public List<OrderItem> GetAll()
+        public async Task<List<OrderItem>> GetAll()
         {
-            return context.OrderItems
-                .Include(oi => oi.Product)
-                .ToList();
+            return await context.OrderItems.Include(oi => oi.Product).ToListAsync();
         }
 
-        public OrderItem? GetByCompositeKey(int orderId, int productId)
+        public async Task<OrderItem?> GetByCompositeKey(int orderId, int productId)
         {
-            return context.OrderItems
+            return await context.OrderItems
                 .Include(oi => oi.Product)
-                .FirstOrDefault(oi => oi.OrderId == orderId && oi.ProductId == productId);
+                .FirstOrDefaultAsync(oi => oi.OrderId == orderId && oi.ProductId == productId);
         }
 
-        public bool Add(OrderItem item)
+        public async Task<List<OrderItem>> GetByOrderId(int orderId)
+        {
+            return await context.OrderItems
+                .Include(oi => oi.Product)
+                .Where(oi => oi.OrderId == orderId)
+                .ToListAsync();
+        }
+
+        public async Task<bool> Add(OrderItem item)
         {
             try
             {
                 context.OrderItems.Add(item);
-                context.SaveChanges();
                 return true;
             }
             catch (Exception)
@@ -42,12 +47,11 @@ namespace CrudApiDemo.Repositories
             }
         }
 
-        public bool Delete(OrderItem item)
+        public async Task<bool> Delete(OrderItem item)
         {
             try
             {
                 context.OrderItems.Remove(item);
-                context.SaveChanges();
                 return true;
             }
             catch (Exception)
@@ -56,25 +60,10 @@ namespace CrudApiDemo.Repositories
             }
         }
 
-        public bool UpdateQuantity(OrderItem item, int newQuantity)
+        public async Task<bool> UpdateQuantity(OrderItem item, int newQuantity)
         {
-            try
-            {
-                item.Quantity = newQuantity;
-                context.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-        }
-        public List<OrderItem> GetByOrderId(int orderId)
-        {
-            return context.OrderItems
-                .Include(oi => oi.Product)
-                .Where(oi => oi.OrderId == orderId)
-                .ToList();
+            item.Quantity = newQuantity;
+            return true;
         }
     }
 }

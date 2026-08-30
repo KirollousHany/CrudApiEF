@@ -2,7 +2,7 @@
 {
     public interface IProductService
     {
-        bool UpdateName(int id, string newName);
-        bool UpdatePrice(int id, decimal newPrice);
+        Task<bool> UpdateName(int id, string newName);
+        Task<bool> UpdatePrice(int id, decimal newPrice);
     }
 }

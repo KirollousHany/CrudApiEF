@@ -1,6 +1,7 @@
 ﻿using CrudApiDemo.Data;
 using CrudApiDemo.Interfaces.IRepository;
 using CrudApiDemo.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrudApiDemo.Repositories
 {
@@ -12,20 +13,26 @@ namespace CrudApiDemo.Repositories
         {
             context = _context;
         }
-        public List<Client> GetAll()
+        public async Task<List<Client>> GetAll()
         {
-            return context.Clients.ToList();
+            return await context.Clients.ToListAsync();
         }
-        public Client? GetById(int id)
+
+        public async Task<Client?> GetById(int id)
         {
-            return context.Clients.FirstOrDefault(c => c.Id == id);
+            return await context.Clients.FirstOrDefaultAsync(c => c.Id == id);
         }
-        public bool Add(Client item)
+
+        public async Task<bool> EmailExists(string email)
+        {
+            return await context.Clients.AnyAsync(c => c.Email == email);
+        }
+
+        public async Task<bool> Add(Client item)
         {
             try
             {
                 context.Clients.Add(item);
-                context.SaveChanges();
                 return true;
             }
             catch (Exception)
@@ -33,12 +40,12 @@ namespace CrudApiDemo.Repositories
                 return false;
             }
         }
-        public bool Delete(Client item)
+
+        public async Task<bool> Delete(Client item)
         {
             try
             {
                 context.Clients.Remove(item);
-                context.SaveChanges();
                 return true;
             }
             catch (Exception)
@@ -46,48 +53,29 @@ namespace CrudApiDemo.Repositories
                 return false;
             }
         }
-        public bool EmailExists(string email)
+
+        public async Task<bool> UpdateName(Client client, string newName)
         {
-            return context.Clients.FirstOrDefault(c => c.Email == email) != null;
+            client.Name = newName;
+            return true;
         }
-        public bool UpdateName(Client client, string newName)
+
+        public async Task<bool> UpdateEmail(Client client, string newEmail)
         {
-            try
-            {
-                client.Name = newName;
-                context.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            client.Email = newEmail;
+            return true;
         }
-        public bool UpdateEmail(Client client, string newEmail)
+
+        public async Task<bool> UpdatePassword(Client client, string newPassword)
         {
-            try
-            {
-                client.Email = newEmail;
-                context.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            client.Password = newPassword;
+            return true;
         }
-        public bool UpdatePassword(Client client, string newPassword)
+
+        public async Task<bool> ClientIdExists(int clientid)
         {
-            try
-            {
-                client.Password = newPassword;
-                context.SaveChanges();
-                return true;
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return await context.Clients.AnyAsync(c => c.Id == clientid);
+
         }
     }
 }

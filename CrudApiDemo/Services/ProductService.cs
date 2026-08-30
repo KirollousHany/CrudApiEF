@@ -6,47 +6,91 @@ namespace CrudApiDemo.Services
 {
     public class ProductService : ICrudService<Product>, IProductService
     {
-        private readonly ICrudRepository<Product> crudRepo;
-        private readonly IProductRepository productRepo;
+        private readonly IUnitOfWork _uow;
 
-        public ProductService(ICrudRepository<Product> _crudRepo, IProductRepository _productRepo)
+        public ProductService(IUnitOfWork uow)
         {
-            crudRepo = _crudRepo;
-            productRepo = _productRepo;
+            _uow = uow;
         }
 
-        public List<Product> GetAll()
+        public async Task<List<Product>> GetAll()
         {
-            return crudRepo.GetAll();
+            return await _uow.ProductCrudRepo.GetAll();
         }
 
-        public bool Add(Product item)
+        public async Task<Product?> GetById(int id)
         {
-            return crudRepo.Add(item);
+            Product? product = await _uow.ProductCrudRepo.GetById(id);
+            return product;
         }
 
-        public bool Delete(int id)
+        public async Task<bool> Add(Product item)
         {
-            var product = crudRepo.GetById(id);
-            return product != null ? crudRepo.Delete(product) : false;
+            if (!await _uow.ProductCrudRepo.Add(item)) return false;
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-
-        public Product? GetById(int id)
+        public async Task<bool> Delete(int id)
         {
-            return crudRepo.GetById(id);
+            var existing = await _uow.ProductCrudRepo.GetById(id);
+            if (existing == null) return false;
+
+            if (!await _uow.ProductCrudRepo.Delete(existing)) return false;
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-        public bool UpdateName(int id, string newName)
+        public async Task<bool> UpdateName(int id, string newName)
         {
-            var product = crudRepo.GetById(id);
-            return product != null ? productRepo.UpdateName(product, newName) : false;
+            var existing = await _uow.ProductCrudRepo.GetById(id);
+            if (existing == null) return false;
+
+            await _uow.ProductRepo.UpdateName(existing, newName);
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-        public bool UpdatePrice(int id, decimal newPrice)
+        public async Task<bool> UpdatePrice(int id, decimal newPrice)
         {
-            var product = crudRepo.GetById(id);
-            return product != null ? productRepo.UpdatePrice(product, newPrice) : false;
+            var existing = await _uow.ProductCrudRepo.GetById(id);
+            if (existing == null) return false;
+
+            await _uow.ProductRepo.UpdatePrice(existing, newPrice);
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

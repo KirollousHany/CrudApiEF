@@ -6,63 +6,86 @@ namespace CrudApiDemo.Services
 {
     public class OrderItemService : IOrderItemService
     {
-        private readonly IOrderItemRepository repo;
-        private readonly ICrudRepository<Order> orderRepo;
-        private readonly ICrudRepository<Product> productRepo;
+        private readonly IUnitOfWork _uow;
 
-        public OrderItemService(IOrderItemRepository _repo, ICrudRepository<Order> _orderRepo, ICrudRepository<Product> _productRepo)
+        public OrderItemService(IUnitOfWork uow)
         {
-            repo = _repo;
-            orderRepo = _orderRepo;
-            productRepo = _productRepo;
+            _uow = uow;
         }
 
-        public List<OrderItem> GetAll()
+        public async Task<List<OrderItem>> GetAll()
         {
-            return repo.GetAll();
+            return await _uow.OrderItemRepo.GetAll();
         }
 
-        public OrderItem? GetByCompositeKey(int orderId, int productId)
+        public async Task<OrderItem?> GetByCompositeKey(int orderId, int productId)
         {
-            return repo.GetByCompositeKey(orderId, productId);
+            return await _uow.OrderItemRepo.GetByCompositeKey(orderId, productId);
         }
 
-        public bool Add(OrderItem item)
+        public async Task<List<OrderItem>> GetByOrderId(int orderId)
         {
-            if (!OrderExists(item.OrderId) || !ProductExists(item.ProductId)) return false;
+            return await _uow.OrderItemRepo.GetByOrderId(orderId);
+        }
 
-            var alreadyExists = repo.GetByCompositeKey(item.OrderId, item.ProductId);
-            if (alreadyExists != null)
+        public async Task<bool> Add(OrderItem item)
+        {
+            var existing = await _uow.OrderItemRepo.GetByCompositeKey(item.OrderId, item.ProductId);
+
+            if (existing != null)
             {
-                return repo.UpdateQuantity(alreadyExists, alreadyExists.Quantity + item.Quantity);
+                await _uow.OrderItemRepo.UpdateQuantity(existing, existing.Quantity + item.Quantity);
             }
-            return repo.Add(item);
+            else
+            {
+                await _uow.OrderItemRepo.Add(item);
+            }
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-        public bool Delete(int orderId, int productId)
+        public async Task<bool> Delete(int orderId, int productId)
         {
-            var existing = repo.GetByCompositeKey(orderId, productId);
+            var existing = await _uow.OrderItemRepo.GetByCompositeKey(orderId, productId);
             if (existing == null) return false;
-            return repo.Delete(existing);
+
+            if (!await _uow.OrderItemRepo.Delete(existing)) return false;
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
 
-        public bool UpdateQuantity(int orderId, int productId, int newQuantity)
+        public async Task<bool> UpdateQuantity(int orderId, int productId, int newQuantity)
         {
-            var existing = repo.GetByCompositeKey(orderId, productId);
+            var existing = await _uow.OrderItemRepo.GetByCompositeKey(orderId, productId);
             if (existing == null) return false;
-            return repo.UpdateQuantity(existing, newQuantity);
-        }
-        public bool OrderExists(int orderId)
-        {
-            return orderRepo.GetById(orderId) != null;
-        }
-        public bool ProductExists(int productId)
-        {
-            return productRepo.GetById(productId) != null;
-        }
-        public List<OrderItem> GetByOrderId(int orderId)
-        {
-            return repo.GetByOrderId(orderId);
+
+            await _uow.OrderItemRepo.UpdateQuantity(existing, newQuantity);
+
+            try
+            {
+                await _uow.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

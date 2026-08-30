@@ -1,42 +1,41 @@
 using CrudApiDemo.Data;
-using CrudApiDemo.Endpoints;
-using CrudApiDemo.Interfaces.IRepository;
-using CrudApiDemo.Interfaces.IService;
-using CrudApiDemo.Models;
-using CrudApiDemo.Repositories;
-using CrudApiDemo.Services;
+using CrudApiDemo.Extensions.DJ;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-#region Client DJ
-builder.Services.AddScoped<ICrudRepository<Client>, ClientRepository>();
-builder.Services.AddScoped<IClientRepository, ClientRepository>();
-builder.Services.AddScoped<ICrudService<Client>, ClientService>();
-builder.Services.AddScoped<IClientService, ClientService>();
-#endregion
+builder.Services.AddApplicationServices();
+builder.Services.AddControllers();
 
-#region Product DJ
-builder.Services.AddScoped<ICrudRepository<Product>, ProductRepository>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<ICrudService<Product>, ProductService>();
-builder.Services.AddScoped<IProductService, ProductService>();
-#endregion
 
-#region Order DJ
-builder.Services.AddScoped<ICrudRepository<Order>, OrderRepository>();
-builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<ICrudService<Order>, OrderService>();
-builder.Services.AddScoped<IOrderService, OrderService>();
-#endregion
+builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
+//builder.Services.AddValidatorsFromAssemblyContaining<CreateClientDtoValidator>();
+//builder.Services.AddFluentValidationAutoValidation();
 
-#region OrderItem DJ
-builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
-builder.Services.AddScoped<IOrderItemService, OrderItemService>();
-#endregion
+//builder.Services.Configure<ApiBehaviorOptions>(options =>
+//{
+//    options.InvalidModelStateResponseFactory = context =>
+//    {
+//        var errors = context.ModelState
+//            .Where(x => x.Value?.Errors.Count > 0)
+//            .SelectMany(x => x.Value!.Errors)
+//            .Select(x => x.ErrorMessage)
+//            .ToList();
+
+//        var errorMessage = string.Join(" ", errors);
+
+//        var response = BaseResponse<object>.FailResponse(
+//            errorMessage,
+//            StatusCodes.Status400BadRequest);
+
+//        return new BadRequestObjectResult(response);
+//    };
+//});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -48,10 +47,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.MapClientEndpoints();
-app.MapProductEndpoints();
-app.MapOrderEndpoints();
-app.MapOrderItemEndpoints();
+app.MapControllers();
+//app.MapClientEndpoints();
+//app.MapProductEndpoints();
+//app.MapOrderEndpoints();
+//app.MapOrderItemEndpoints();
 
 app.Run();
