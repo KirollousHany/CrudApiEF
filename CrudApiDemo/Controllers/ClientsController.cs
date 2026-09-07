@@ -1,13 +1,13 @@
-﻿using CrudApiDemo.Dtos.ClientDtos;
-using CrudApiDemo.Dtos.ClientDtos.Mappers;
-using CrudApiDemo.Interfaces.IService;
-using CrudApiDemo.Models;
-using CrudApiDemo.Responses;
-using CrudApiDemo.ViewModels;
+﻿using Application.Dtos.ClientDtos;
+using Application.Dtos.ClientDtos.Mappers;
+using Application.Interfaces.IService;
+using Application.Responses;
+using Application.ViewModels;
+using Domain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrudApiDemo.Controllers
+namespace Api.Controllers
 {
     [Route("api/[controller]")]
     public class ClientsController : BaseApiController

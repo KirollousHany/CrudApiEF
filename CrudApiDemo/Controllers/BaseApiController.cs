@@ -1,8 +1,8 @@
-﻿using CrudApiDemo.Responses;
+﻿using Application.Responses;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrudApiDemo.Controllers
+namespace Api.Controllers
 {
     [ApiController]
     public abstract class BaseApiController : ControllerBase

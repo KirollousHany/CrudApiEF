@@ -1,12 +1,13 @@
-﻿using CrudApiDemo.Dtos.ProductDtos;
-using CrudApiDemo.Dtos.ProductDtos.Mappers;
-using CrudApiDemo.Interfaces.IService;
-using CrudApiDemo.Models;
-using CrudApiDemo.Responses;
+﻿using Application.Dtos.ProductDtos;
+using Application.Dtos.ProductDtos.Mappers;
+using Application.Interfaces.IService;
+using Application.Responses;
+using Domain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrudApiDemo.Controllers
+
+namespace Api.Controllers
 {
     [Route("api/[controller]")]
     public class ProductsController : BaseApiController

@@ -1,12 +1,13 @@
-﻿using CrudApiDemo.Dtos.OrderDtos;
-using CrudApiDemo.Dtos.OrderDtos.Mapper;
-using CrudApiDemo.Interfaces.IService;
-using CrudApiDemo.Models;
-using CrudApiDemo.Responses;
+﻿using Application.Dtos.OrderDtos;
+using Application.Dtos.OrderDtos.Mapper;
+using Application.Interfaces.IService;
+using Application.Responses;
+using Domain.Entities;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CrudApiDemo.Controllers
+
+namespace Api.Controllers
 {
     [Route("api/[controller]")]
     public class OrdersController : BaseApiController

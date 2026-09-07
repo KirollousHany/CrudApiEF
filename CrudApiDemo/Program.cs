@@ -1,8 +1,6 @@
-using CrudApiDemo.Data;
-using CrudApiDemo.Extensions.DJ;
-using FluentValidation;
+using Api.Extensions;
+using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,31 +9,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddApplicationServices();
 builder.Services.AddControllers();
-
-
-builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly, includeInternalTypes: true);
-//builder.Services.AddValidatorsFromAssemblyContaining<CreateClientDtoValidator>();
-//builder.Services.AddFluentValidationAutoValidation();
-
-//builder.Services.Configure<ApiBehaviorOptions>(options =>
-//{
-//    options.InvalidModelStateResponseFactory = context =>
-//    {
-//        var errors = context.ModelState
-//            .Where(x => x.Value?.Errors.Count > 0)
-//            .SelectMany(x => x.Value!.Errors)
-//            .Select(x => x.ErrorMessage)
-//            .ToList();
-
-//        var errorMessage = string.Join(" ", errors);
-
-//        var response = BaseResponse<object>.FailResponse(
-//            errorMessage,
-//            StatusCodes.Status400BadRequest);
-
-//        return new BadRequestObjectResult(response);
-//    };
-//});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -48,9 +21,5 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.MapControllers();
-//app.MapClientEndpoints();
-//app.MapProductEndpoints();
-//app.MapOrderEndpoints();
-//app.MapOrderItemEndpoints();
 
 app.Run();

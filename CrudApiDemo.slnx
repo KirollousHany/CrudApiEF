@@ -1,3 +1,6 @@
 <Solution>
-  <Project Path="CrudApiDemo/CrudApiDemo.csproj" />
+  <Project Path="Application/Application.csproj" Id="be630b01-7acc-481c-98f3-050ba145ac09" />
+  <Project Path="CrudApiDemo/Api.csproj" />
+  <Project Path="Domain/Domain.csproj" Id="83d211a7-cd9c-4820-a251-a9118ec7520c" />
+  <Project Path="Infrastructure/Infrastructure.csproj" Id="ab1a2a98-9194-4314-856e-c33c5b4ccdf0" />
 </Solution>
